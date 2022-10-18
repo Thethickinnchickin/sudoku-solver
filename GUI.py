@@ -5,23 +5,33 @@ import time
 pygame.font.init()
 
 class Grid:
+    # board = [
+    #     [7, 8, 0, 4, 0, 0, 1, 2, 0],
+    #     [6, 0, 0, 0, 7, 5, 0, 0, 9],
+    #     [0, 0, 0, 6, 0, 1, 0, 7, 8],
+    #     [0, 0, 7, 0, 4, 0, 2, 6, 0],
+    #     [0, 0, 1, 0, 5, 0, 9, 3, 0],
+    #     [9, 0, 4, 0, 6, 0, 0, 0, 5],
+    #     [0, 7, 0, 3, 0, 0, 0, 1, 2],
+    #     [1, 2, 0, 0, 0, 7, 4, 0, 0],
+    #     [0, 4, 9, 2, 0, 6, 0, 0, 7]
+    # ]
     board = [
-        [7, 8, 0, 4, 0, 0, 1, 2, 0],
-        [6, 0, 0, 0, 7, 5, 0, 0, 9],
-        [0, 0, 0, 6, 0, 1, 0, 7, 8],
-        [0, 0, 7, 0, 4, 0, 2, 6, 0],
-        [0, 0, 1, 0, 5, 0, 9, 3, 0],
-        [9, 0, 4, 0, 6, 0, 0, 0, 5],
-        [0, 7, 0, 3, 0, 0, 0, 1, 2],
-        [1, 2, 0, 0, 0, 7, 4, 0, 0],
-        [0, 4, 9, 2, 0, 6, 0, 0, 7]
+        [9, 2, 6, 1, 7, 8, 5, 4, 3],
+        [4, 7, 3, 6, 5, 2, 1, 9, 9],
+        [8, 5, 1, 9, 4, 3, 6, 2, 7],
+        [6, 8, 5, 2, 3, 1, 9, 7, 4],
+        [7, 3, 4, 8, 9, 5, 2, 6, 1],
+        [2, 1, 9, 4, 6, 7, 8, 3, 5],
+        [5, 6, 8, 7, 2, 4, 3, 1, 9],
+        [3, 4, 2, 5, 1, 9, 7, 8, 6],
+        [1, 9, 7, 3, 8, 6, 4, 5, 0],
     ]
 
     def __init__(self, rows, cols, width, height):
         self.rows = rows
         self.cols = cols
-        self.cubes = [[Cube(self.board[i][j], i, j, width, height) 
-        for j in range(cols)] for i in range(rows)]
+        self.cubes = [[Cube(self.board[i][j], i, j, width, height) for j in range(cols)] for i in range(rows)]
         self.width = width 
         self.height = height
         self.model = None
@@ -58,7 +68,7 @@ class Grid:
             else:
                 thick = 1
             pygame.draw.line(win, (0,0,0),
-             (0, i+gap), (self.width, i+gap), thick)
+             (0, i*gap), (self.width, i*gap), thick)
             pygame.draw.line(win, (0, 0, 0), (i * gap, 0), (i * gap, self.height), thick)
 
         #Draw ccubes
@@ -73,6 +83,7 @@ class Grid:
                 self.cubes[i][j].selected = False
 
         self.cubes[row][col].selected = True
+        self.selected = (row, col)
 
     def clear(self):
         row, col = self.selected
@@ -110,18 +121,23 @@ class Cube:
         self.selected = False
 
     def draw (self, win):
-        fnt = pygame.font.SysFont("Arial", 40)
+        fnt = pygame.font.SysFont("Courier", 40)
 
         gap = self.width / 9
         x = self.col * gap
         y = self.row * gap
 
         if self.temp != 0 and self.value == 0:
-            text = fnt.render(str(self.temp), 1, (0, 0, 0))
+            text = fnt.render(str(self.temp), 1, (128, 128, 128))
+            win.blit(text, (x+5, y+5))
+
+        elif not self.value == 0:
+            text = fnt.render(str(self.value), 1, (0, 0, 0))
             win.blit(text, (x + (gap/2 - text.get_width()/2), y + (gap/2 - text.get_height()/2)))
 
-            if self.selected:
-                pygame.draw.rect(win, (255,0,0), (x, y, gap, gap), 3)
+            
+        if self.selected:
+            pygame.draw.rect(win, (255,0,0), (x, y, gap, gap), 3)
 
 
     def set(self, val):
@@ -134,7 +150,7 @@ def redraw_window(win, board, time, strikes):
     # Draw time
     fnt = pygame.font.SysFont("Arial", 40)
     text = fnt.render("Time: "+ format_time(time), 1, (0,0,0))
-    win.blit(text, (540 - 16, 560))
+    win.blit(text, (540 - 260, 560))
     # Draw Strikes
     text = fnt.render("X " * strikes, 1, (255, 0, 0))
     win.blit(text, (20, 560))
@@ -166,6 +182,7 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
                     key = 1
+
                 if event.key == pygame.K_2:
                     key = 2
                 if event.key == pygame.K_3:
@@ -205,8 +222,8 @@ def main():
                     board.select(clicked[0], clicked[1])
                     key = None
 
-        if board.selected and key != None:
-            board.sketch(key)
+            if board.selected and key != None:
+                board.sketch(key)
 
         redraw_window(win, board, play_time, strikes)
         pygame.display.update()
