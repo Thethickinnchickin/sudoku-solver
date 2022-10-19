@@ -5,28 +5,18 @@ import time
 pygame.font.init()
 
 class Grid:
-    # board = [
-    #     [7, 8, 0, 4, 0, 0, 1, 2, 0],
-    #     [6, 0, 0, 0, 7, 5, 0, 0, 9],
-    #     [0, 0, 0, 6, 0, 1, 0, 7, 8],
-    #     [0, 0, 7, 0, 4, 0, 2, 6, 0],
-    #     [0, 0, 1, 0, 5, 0, 9, 3, 0],
-    #     [9, 0, 4, 0, 6, 0, 0, 0, 5],
-    #     [0, 7, 0, 3, 0, 0, 0, 1, 2],
-    #     [1, 2, 0, 0, 0, 7, 4, 0, 0],
-    #     [0, 4, 9, 2, 0, 6, 0, 0, 7]
-    # ]
     board = [
-        [9, 2, 6, 1, 7, 8, 5, 4, 3],
-        [4, 7, 3, 6, 5, 2, 1, 9, 9],
-        [8, 5, 1, 9, 4, 3, 6, 2, 7],
-        [6, 8, 5, 2, 3, 1, 9, 7, 4],
-        [7, 3, 4, 8, 9, 5, 2, 6, 1],
-        [2, 1, 9, 4, 6, 7, 8, 3, 5],
-        [5, 6, 8, 7, 2, 4, 3, 1, 9],
-        [3, 4, 2, 5, 1, 9, 7, 8, 6],
-        [1, 9, 7, 3, 8, 6, 4, 5, 0],
+        [7, 8, 0, 4, 0, 0, 1, 2, 0],
+        [6, 0, 0, 0, 7, 5, 0, 0, 9],
+        [0, 0, 0, 6, 0, 1, 0, 7, 8],
+        [0, 0, 7, 0, 4, 0, 2, 6, 0],
+        [0, 0, 1, 0, 5, 0, 9, 3, 0],
+        [9, 0, 4, 0, 6, 0, 0, 0, 5],
+        [0, 7, 0, 3, 0, 0, 0, 1, 2],
+        [1, 2, 0, 0, 0, 7, 4, 0, 0],
+        [0, 4, 9, 2, 0, 6, 0, 0, 7]
     ]
+
 
     def __init__(self, rows, cols, width, height):
         self.rows = rows
@@ -145,16 +135,29 @@ class Cube:
     def set_temp(self, val):
         self.temp = val
     
-def redraw_window(win, board, time, strikes):
+def redraw_window(win, board, time, strikes, success):
     win.fill((255,255,255))
     # Draw time
     fnt = pygame.font.SysFont("Arial", 40)
     text = fnt.render("Time: "+ format_time(time), 1, (0,0,0))
     win.blit(text, (540 - 260, 560))
     # Draw Strikes
-    text = fnt.render("X " * strikes, 1, (255, 0, 0))
-    win.blit(text, (20, 560))
+    if success:
+        text = fnt.render("success", 1, (255, 0, 0))
+        win.blit(text, (20, 560))  
+    else:
+        text = fnt.render("X " * strikes, 1, (255, 0, 0))
+        win.blit(text, (20, 560))  
+    
     # Draw grid and board
+    board.draw(win)
+
+def redraw_success_window(win, board):
+    win.fill((255,255,255))
+    fnt = pygame.font.SysFont("Arial", 40)
+    text = fnt.render("Success", 1,(255, 0, 0))
+    win.blit(text, (20, 560))
+
     board.draw(win)
 
 def format_time(secs):
@@ -170,9 +173,12 @@ def main():
     pygame.display.set_caption("Sudoku")
     board = Grid(9, 9, 540, 540)
     key = None
+    success = False
     run = True
     start = time.time()
     strikes = 0
+
+
     while run:
         play_time = round(time.time() - start)
 
@@ -199,13 +205,14 @@ def main():
                     key = 8
                 if event.key == pygame.K_9:
                     key = 9
-                if event.key == pygame.K_DELETE:
+                if event.key == pygame.K_e:
                     board.clear()
                     key = None
                 if event.key == pygame.K_RETURN:
                     i, j = board.selected
                     if board.cubes[i][j].temp != 0:
                         if board.place(board.cubes[i][j].temp):
+                            success = True
                             print("Success")
                         else:
                             print("Wrong")
@@ -213,7 +220,9 @@ def main():
                         key = None
                         if board.is_finished():
                             print("Game over")
-                            run = False
+
+
+                            
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
@@ -225,7 +234,7 @@ def main():
             if board.selected and key != None:
                 board.sketch(key)
 
-        redraw_window(win, board, play_time, strikes)
+        redraw_window(win, board, play_time, strikes, success)
         pygame.display.update()
 
 main()
