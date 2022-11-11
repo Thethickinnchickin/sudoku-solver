@@ -1,5 +1,9 @@
 # solver.py
 
+"""
+Solving board for user
+@return false if soduku game conditions not met
+"""
 def solve(bo):
     find = find_empty(bo)
     if not find:
@@ -14,6 +18,12 @@ def solve(bo):
                 return True
             bo[row][col] = 0
     return False
+
+
+"""
+Checking to see if the row is valid 
+@return true if correct
+"""
 
 def valid(bo, num, pos):
     #Check row
@@ -35,6 +45,11 @@ def valid(bo, num, pos):
 
     return True
 
+
+"""
+Creating View to create board
+
+"""
 def print_board(bo):
     for i in range(len(bo)):
         if i % 3 == 0 and i != 0:
